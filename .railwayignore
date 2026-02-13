@@ -1,0 +1,13 @@
+# Keep upload small so "railway up" is light on your machine
+node_modules
+.git
+dist
+dist-ssr
+*.log
+.DS_Store
+.idea
+.vscode
+*.local
+.cursor
+.env
+.env.*
