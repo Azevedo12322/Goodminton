@@ -1,0 +1,3 @@
+# Use npm install so the build doesn't fail on npm ci (lockfile/Node version issues)
+[phases.install]
+cmds = ["npm install"]
