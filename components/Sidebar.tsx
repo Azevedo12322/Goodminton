@@ -24,7 +24,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isAdmin, logg
     <aside className="w-64 glass-effect border-r border-slate-800 flex flex-col hidden md:flex">
       <div className="p-8">
         <h1 className="text-xl font-black bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent italic tracking-tighter">
-          GOODMINTON_CT1
+          GOODMINTON CT1
         </h1>
         <p className="text-[10px] text-slate-500 mt-2 uppercase tracking-[0.2em] font-bold">Turma 12ºCT1 • 2026</p>
       </div>

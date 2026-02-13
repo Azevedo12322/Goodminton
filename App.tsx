@@ -377,11 +377,11 @@ const App: React.FC = () => {
 
   if (!loggedPlayer) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-950 p-4">
+      <div className="flex min-h-screen w-full items-center justify-center bg-slate-950 p-4 pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
         <form onSubmit={handleLogin} className="glass-effect p-10 rounded-[2.5rem] border border-slate-800 space-y-8 w-full max-w-md animate-fadeIn">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-black bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent italic tracking-tighter">
-              GOODMINTON_CT1
+              GOODMINTON CT1
             </h1>
             <p className="text-slate-400 text-sm">Bem-vindo! Entra com o teu nome de atleta.</p>
           </div>
