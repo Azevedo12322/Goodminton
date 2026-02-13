@@ -18,7 +18,8 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, 
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'kiko2008') {
+    const expectedPassword = typeof import.meta.env.VITE_ADMIN_PASSWORD === 'string' ? import.meta.env.VITE_ADMIN_PASSWORD : '';
+    if (expectedPassword && password === expectedPassword) {
       onLogin(true);
     } else {
       alert('Password incorreta!');

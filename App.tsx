@@ -26,14 +26,22 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<StudioTab>(StudioTab.HOME);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loggedPlayer, setLoggedPlayer] = useState<Player | null>(() => {
-    const saved = localStorage.getItem('goodminton_state_v5_g2pool_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('goodminton_state_v5_g2pool_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
   const [loginInput, setLoginInput] = useState('');
   
   const [tournament, setTournament] = useState<TournamentState>(() => {
-    const saved = localStorage.getItem('goodminton_state_v5_g2pool');
-    if (saved) return JSON.parse(saved);
+    try {
+      const saved = localStorage.getItem('goodminton_state_v5_g2pool');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // Tampered or corrupted localStorage; use default state
+    }
 
     const matches: Match[] = [];
     

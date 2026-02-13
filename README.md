@@ -14,6 +14,7 @@ Torneio Badminton 12ºCT1 — run and deploy this app locally or to Railway.
    `npm install`
 2. Run the app:
    `npm run dev`
+3. (Optional) For admin login, create a `.env` file with `VITE_ADMIN_PASSWORD=your_secret_password`.
 
 ## Deploy to Railway
 
@@ -32,3 +33,5 @@ Torneio Badminton 12ºCT1 — run and deploy this app locally or to Railway.
 4. **Get a public URL:**
    - In the service → **Settings** → **Networking** → **Generate Domain**.
    - Your app will be live at the generated URL (e.g. `https://your-app.up.railway.app`).
+
+5. **Admin panel (optional):** To log in to the admin panel, set the **`VITE_ADMIN_PASSWORD`** variable in Railway (service → Variables). Use a strong password; if unset, admin login is disabled. See [SECURITY.md](SECURITY.md) for details.
