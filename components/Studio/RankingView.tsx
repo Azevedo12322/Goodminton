@@ -108,40 +108,40 @@ const RankingView: React.FC<RankingViewProps> = ({ state }) => {
   }, [state.matches, state.players]);
 
   return (
-    <div className="max-w-3xl mx-auto py-8 animate-fadeIn space-y-8">
+    <div className="max-w-3xl mx-auto py-4 sm:py-8 px-1 animate-fadeIn space-y-6 sm:space-y-8">
       <div className="text-center">
-        <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">Ranking dos Loios</h2>
-        <p className="text-slate-500 text-sm mt-2">Consulta a performance oficial dos atletas</p>
+        <h2 className="text-xl sm:text-3xl font-black text-white italic tracking-tighter uppercase">Ranking dos Loios</h2>
+        <p className="text-slate-500 text-xs sm:text-sm mt-2">Consulta a performance oficial dos atletas</p>
       </div>
 
-      <div className="flex p-1 bg-slate-900 border border-slate-800 rounded-2xl w-fit mx-auto">
+      <div className="flex flex-wrap justify-center gap-2 sm:gap-0 p-1 bg-slate-900 border border-slate-800 rounded-2xl w-full sm:w-fit mx-auto">
         <button 
           onClick={() => setActiveTab('final')}
-          className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-            activeTab === 'final' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'
+          className={`flex-1 sm:flex-none min-w-0 sm:min-w-[auto] px-4 sm:px-6 py-2.5 min-h-[44px] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all touch-manipulation ${
+            activeTab === 'final' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300 active:bg-slate-800'
           }`}
         >
           Classificação Final
         </button>
         <button 
           onClick={() => setActiveTab('points')}
-          className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-            activeTab === 'points' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'
+          className={`flex-1 sm:flex-none min-w-0 sm:min-w-[auto] px-4 sm:px-6 py-2.5 min-h-[44px] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all touch-manipulation ${
+            activeTab === 'points' ? 'bg-emerald-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300 active:bg-slate-800'
           }`}
         >
           Ranking de Pontos
         </button>
       </div>
 
-      <div className="glass-effect rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
+      <div className="glass-effect rounded-xl sm:rounded-[2.5rem] border border-slate-800 overflow-hidden shadow-2xl">
         {activeTab === 'final' ? (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
+          <div className="overflow-x-auto -mx-1 sm:mx-0">
+            <table className="w-full text-left min-w-[280px]">
               <thead>
                 <tr className="bg-slate-900/80 border-b border-slate-800">
-                  <th className="px-4 md:px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Posição</th>
-                  <th className="px-4 md:px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Nome do Atleta</th>
-                  <th className="px-4 md:px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Grupo Origem</th>
+                  <th className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Pos.</th>
+                  <th className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Atleta</th>
+                  <th className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Grupo</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
@@ -157,8 +157,8 @@ const RankingView: React.FC<RankingViewProps> = ({ state }) => {
                   
                   return (
                     <tr key={rank} className={`hover:bg-emerald-500/5 transition-colors ${rank <= 3 ? 'bg-emerald-500/5' : ''}`}>
-                      <td className="px-4 md:px-8 py-4">
-                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-lg font-black text-sm ${
+                      <td className="px-2 sm:px-4 md:px-8 py-3 sm:py-4">
+                        <span className={`inline-flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-lg font-black text-xs sm:text-sm ${
                           rank === 1 ? 'bg-yellow-500 text-slate-950 shadow-lg shadow-yellow-500/20' :
                           rank === 2 ? 'bg-slate-300 text-slate-950' :
                           rank === 3 ? 'bg-orange-600 text-white' : 'bg-slate-800 text-slate-400'
@@ -166,11 +166,11 @@ const RankingView: React.FC<RankingViewProps> = ({ state }) => {
                           {rank}º
                         </span>
                       </td>
-                      <td className={`px-4 md:px-8 py-4 font-bold text-sm ${p ? 'text-white' : 'text-slate-600'}`}>
+                      <td className={`px-2 sm:px-4 md:px-8 py-3 sm:py-4 font-bold text-xs sm:text-sm truncate max-w-[120px] sm:max-w-none ${p ? 'text-white' : 'text-slate-600'}`}>
                         {p ? p.name : 'A definir...'}
                       </td>
-                      <td className="px-4 md:px-8 py-4 text-right">
-                        <span className={`text-[9px] font-black px-2 py-1 rounded-full border whitespace-nowrap ${
+                      <td className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 text-right">
+                        <span className={`text-[8px] sm:text-[9px] font-black px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full border whitespace-nowrap ${
                           rank <= 3 ? 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10' : 'border-slate-800 text-slate-500'
                         }`}>
                           {group}
@@ -183,22 +183,22 @@ const RankingView: React.FC<RankingViewProps> = ({ state }) => {
             </table>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
+          <div className="overflow-x-auto -mx-1 sm:mx-0">
+            <table className="w-full text-left min-w-[240px]">
               <thead>
                 <tr className="bg-slate-900/80 border-b border-slate-800">
-                  <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Rank</th>
-                  <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Atleta</th>
-                  <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Pontos Totais</th>
+                  <th className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Rank</th>
+                  <th className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Atleta</th>
+                  <th className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Pontos</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
                 {playerPoints.map((p, i) => (
                   <tr key={p.id} className="hover:bg-emerald-500/5 transition-colors">
-                    <td className="px-8 py-4 text-xs font-black text-slate-500 italic">#{i + 1}</td>
-                    <td className="px-8 py-4 font-bold text-sm text-white">{p.name}</td>
-                    <td className="px-8 py-4 text-right">
-                      <span className="text-lg font-mono font-black text-emerald-400">
+                    <td className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 text-xs font-black text-slate-500 italic">#{i + 1}</td>
+                    <td className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 font-bold text-xs sm:text-sm text-white truncate max-w-[100px] sm:max-w-none">{p.name}</td>
+                    <td className="px-2 sm:px-4 md:px-8 py-3 sm:py-4 text-right">
+                      <span className="text-base sm:text-lg font-mono font-black text-emerald-400">
                         {p.points}
                       </span>
                     </td>
@@ -210,9 +210,9 @@ const RankingView: React.FC<RankingViewProps> = ({ state }) => {
         )}
       </div>
 
-      <div className="bg-blue-500/5 border border-blue-500/20 p-5 rounded-2xl">
+      <div className="bg-blue-500/5 border border-blue-500/20 p-4 sm:p-5 rounded-xl sm:rounded-2xl">
          <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2">Regras de Classificação</p>
-         <ul className="text-[10px] text-slate-400 space-y-1 font-medium list-disc list-inside">
+         <ul className="text-[9px] sm:text-[10px] text-slate-400 space-y-1 font-medium list-disc list-inside">
            <li>As posições de Pool (1-9, 12-14, 17-19) são decididas pela soma de pontos nos 3 jogos da Pool.</li>
            <li>As posições Extra (10-11, 15-16, 20-21) são decididas pela soma de pontos dos eliminados em suas respectivas fases.</li>
            <li>O ranking global de pontos considera todos os pontos marcados em qualquer fase do torneio.</li>

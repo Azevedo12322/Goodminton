@@ -24,7 +24,7 @@ const BracketView: React.FC<BracketViewProps> = ({ state, onMatchClick }) => {
     return (
       <div 
         onClick={() => onMatchClick?.(match.id)}
-        className={`glass-effect p-3.5 rounded-2xl border mb-4 cursor-pointer transition-all hover:scale-[1.02] ${
+        className={`glass-effect p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border mb-3 sm:mb-4 cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.99] touch-manipulation ${
           isCompleted ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-slate-800'
         }`}
       >
@@ -90,14 +90,14 @@ const BracketView: React.FC<BracketViewProps> = ({ state, onMatchClick }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Group Selector */}
       <div className="flex flex-wrap gap-2">
         {(['G1', 'G2', 'G3', 'G4', 'G5', 'GC'] as GroupId[]).map(gid => (
           <button
             key={gid}
             onClick={() => handleGroupChange(gid)}
-            className={`px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+            className={`px-3 sm:px-4 py-2.5 min-h-[44px] rounded-xl sm:rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all touch-manipulation ${
               activeGroup === gid 
                 ? 'bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-900/20' 
                 : 'bg-slate-900 border-slate-800 text-slate-500 hover:bg-slate-800 hover:text-slate-200'
@@ -110,7 +110,7 @@ const BracketView: React.FC<BracketViewProps> = ({ state, onMatchClick }) => {
 
       <div className="space-y-4">
         {/* Active Group Info */}
-        <div className="bg-emerald-500/5 border border-emerald-500/20 p-5 rounded-[2rem] flex items-center gap-4">
+        <div className="bg-emerald-500/5 border border-emerald-500/20 p-4 sm:p-5 rounded-xl sm:rounded-[2rem] flex items-center gap-3 sm:gap-4">
           <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400">
              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
           </div>
@@ -140,7 +140,7 @@ const BracketView: React.FC<BracketViewProps> = ({ state, onMatchClick }) => {
                 <button
                   key={r}
                   onClick={() => setSelectedRound(r)}
-                  className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                  className={`px-4 sm:px-6 py-2 min-h-[40px] rounded-xl text-[10px] font-black uppercase tracking-widest transition-all touch-manipulation ${
                     selectedRound === r 
                       ? 'bg-emerald-600 text-white shadow-lg' 
                       : 'text-slate-500 hover:text-slate-300'
@@ -155,8 +155,8 @@ const BracketView: React.FC<BracketViewProps> = ({ state, onMatchClick }) => {
       </div>
 
       {/* Bracket View Container */}
-      <div className="overflow-x-auto custom-scrollbar pb-8">
-        <div className={`flex md:gap-16 p-4 min-h-[700px] ${rounds.length > 1 ? 'md:min-w-[1200px]' : 'min-w-full justify-center'}`}>
+      <div className="overflow-x-auto custom-scrollbar pb-6 -mx-3 sm:mx-0 px-2 sm:px-4">
+        <div className={`flex md:gap-16 p-2 sm:p-4 min-h-[500px] sm:min-h-[700px] ${rounds.length > 1 ? 'md:min-w-[1200px]' : 'min-w-full justify-center'}`}>
           {rounds.map(r => {
             const isR3 = r === 2 && activeGroup === 'G1';
             const isPool = activeGroup === 'GC' || activeGroup === 'G2' || ((activeGroup === 'G3' || activeGroup === 'G4' || activeGroup === 'G5') && r === rounds.length - 1);

@@ -75,7 +75,7 @@ const Layout: React.FC<LayoutProps> = ({
           <h1 className="text-lg font-black bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent italic tracking-tighter px-1">
             GOODMINTON_CT1
           </h1>
-          <button onClick={() => setIsMenuOpen(false)} className="text-slate-500 hover:text-white p-2 shrink-0">
+          <button onClick={() => setIsMenuOpen(false)} className="text-slate-500 hover:text-white p-3 -m-2 shrink-0 min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation" aria-label="Fechar menu">
             <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
@@ -87,10 +87,10 @@ const Layout: React.FC<LayoutProps> = ({
                 onTabChange(id);
                 setIsMenuOpen(false);
               }}
-              className={`w-full flex items-center px-5 py-3.5 text-sm font-semibold rounded-2xl transition-all ${
+              className={`w-full flex items-center px-5 py-3.5 min-h-[48px] text-sm font-semibold rounded-2xl transition-all touch-manipulation ${
                 activeTab === id
                   ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-900/10'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 active:bg-slate-800'
               }`}
             >
               <Icon />
@@ -104,11 +104,12 @@ const Layout: React.FC<LayoutProps> = ({
       {sidebar}
 
       <main className="flex-1 relative flex flex-col min-w-0">
-        <header className="h-16 border-b border-slate-800/50 flex items-center justify-between px-4 md:px-8 glass-effect shrink-0 z-30">
-          <div className="flex items-center gap-3">
+        <header className="h-14 sm:h-16 border-b border-slate-800/50 flex items-center justify-between px-3 sm:px-4 md:px-8 glass-effect shrink-0 z-30">
+          <div className="flex items-center gap-2 sm:gap-3">
             <button 
               onClick={() => setIsMenuOpen(true)}
-              className="md:hidden p-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 rounded-xl transition-all"
+              className="md:hidden p-3 -m-2 text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 rounded-xl transition-all touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label="Abrir menu"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <line x1="4" y1="8" x2="20" y2="8" />
@@ -141,15 +142,15 @@ const Layout: React.FC<LayoutProps> = ({
             {onLogout && (
               <button 
                 onClick={onLogout}
-                className="px-3 md:px-4 py-1.5 bg-slate-900 hover:bg-red-900/20 border border-slate-800 hover:border-red-500/30 text-slate-400 hover:text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 group"
+                className="px-3 md:px-4 py-2.5 min-h-[44px] bg-slate-900 hover:bg-red-900/20 border border-slate-800 hover:border-red-500/30 text-slate-400 hover:text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 group touch-manipulation"
               >
-                <span className="hidden xs:inline">Sair</span>
+                <span className="hidden sm:inline">Sair</span>
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
               </button>
             )}
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-8 overscroll-behavior-y-contain">
           {children}
         </div>
       </main>
