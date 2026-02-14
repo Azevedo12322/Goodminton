@@ -1,15 +1,17 @@
 
 import React, { useState } from 'react';
 import { TournamentState, Match } from '../../types';
+import { verifyAdminPassword } from '../../api';
 
 interface AdminPanelProps {
   state: TournamentState;
   onUpdateMatch: (match: Match) => void;
   onLogin: (success: boolean, password?: string) => void;
   isLoggedIn: boolean;
+  saveStatus?: 'saved' | 'error' | null;
 }
 
-const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, isLoggedIn }) => {
+const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, isLoggedIn, saveStatus }) => {
   const [password, setPassword] = useState('');
   const [editingMatch, setEditingMatch] = useState<string | null>(null);
   const [matchData, setMatchData] = useState<Partial<Match>>({});
@@ -18,14 +20,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, 
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const raw = typeof import.meta.env.VITE_ADMIN_PASSWORD === 'string' ? import.meta.env.VITE_ADMIN_PASSWORD : '';
-    const expectedPassword = raw.trim();
     const entered = password.trim();
-    if (expectedPassword && entered === expectedPassword) {
-      onLogin(true, entered);
-    } else {
-      alert('Password incorreta!');
+    if (!entered) {
+      alert('Indica a palavra-passe.');
+      return;
     }
+    // Password is validated by the server when saving; no client-side check so deploy works with only ADMIN_PASSWORD.
+    onLogin(true, entered);
   };
 
   const startEdit = (match: Match) => {
@@ -70,10 +71,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, 
               placeholder="Palavra-passe"
               className="w-full bg-slate-900 border border-slate-800 rounded-xl sm:rounded-2xl p-4 text-base text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); setLoginError(''); }}
+              disabled={verifying}
+              autoComplete="current-password"
             />
-            <button className="w-full py-4 min-h-[48px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl sm:rounded-2xl transition-all shadow-xl shadow-emerald-900/20 active:scale-[0.98] touch-manipulation">
-              Entrar no Painel
+            {loginError && (
+              <p className="text-amber-400 text-sm">{loginError}</p>
+            )}
+            <button
+              type="submit"
+              disabled={verifying}
+              className="w-full py-4 min-h-[48px] bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-bold rounded-xl sm:rounded-2xl transition-all shadow-xl shadow-emerald-900/20 active:scale-[0.98] touch-manipulation"
+            >
+              {verifying ? 'A verificar…' : 'Entrar no Painel'}
             </button>
           </div>
         </form>
@@ -90,6 +100,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, 
         </div>
         <button onClick={() => onLogin(false)} className="px-4 py-2.5 min-h-[44px] text-xs font-black text-slate-500 hover:text-red-400 transition-colors uppercase tracking-widest bg-slate-900 rounded-xl border border-slate-800 touch-manipulation w-fit">Sair</button>
       </div>
+
+      {saveStatus === 'saved' && (
+        <p className="text-emerald-400 text-sm font-medium rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-4 py-2">Guardado no servidor. PC e telemóvel verão os mesmos resultados.</p>
+      )}
+      {saveStatus === 'error' && (
+        <p className="text-amber-300 text-sm font-medium rounded-xl bg-amber-500/10 border border-amber-500/30 px-4 py-2">Falha ao guardar. Verifica que a variável <strong>ADMIN_PASSWORD</strong> está definida no Railway (e que a palavra-passe que inseriste coincide).</p>
+      )}
 
       <div className="grid grid-cols-1 gap-4">
         {state.matches.map((m) => {

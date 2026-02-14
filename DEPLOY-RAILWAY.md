@@ -35,9 +35,20 @@ git push -u origin main
 4. Railway will assign a URL like `https://goodminton-production-xxxx.up.railway.app`.
 5. Open that URL to see your deployed site.
 
-### 4. Automatic deploys (optional)
+### 4. Same scores on PC and mobile (required for sync)
 
-With “Deploy from GitHub”, every push to the connected branch (e.g. `main`) will trigger a new deploy. No extra setup needed.
+**Without this, the PC and mobile can show different data** because each deploy or instance uses its own temporary storage.
+
+1. In your service, go to **Settings** → **Volumes**.
+2. Click **Add Volume**. Set the mount path to **`/data`**.
+3. Go to **Variables** and add: **`DATA_PATH`** = **`/data`**.
+4. Redeploy the service so the volume is attached.
+
+After this, all devices will read and write the same `state.json` on the volume, so scores stay in sync.
+
+### 5. Automatic deploys (optional)
+
+With “Deploy from GitHub”, every push to the connected branch (e.g. `main`) will trigger a new deploy. No extra setup needed. Keep the volume and `DATA_PATH` variable so scores stay in sync after each deploy.
 
 ---
 

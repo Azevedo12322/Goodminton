@@ -18,10 +18,26 @@ function ensureDataDir() {
   }
 }
 
+const STORAGE_IS_PERSISTENT = process.env.DATA_PATH === '/data';
+
+app.post('/api/admin/verify', (req, res) => {
+  const raw = req.headers['x-admin-password'] || req.body?.password || '';
+  const password = (typeof raw === 'string' ? raw : '').trim();
+  const expected = (ADMIN_PASSWORD || '').trim();
+  if (!expected) {
+    return res.status(503).json({ error: 'Admin password not configured on server' });
+  }
+  if (password !== expected) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  res.json({ ok: true });
+});
+
 app.get('/api/state', (req, res) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.set('Pragma', 'no-cache');
   res.set('Expires', '0');
+  res.set('X-Storage-Persistent', STORAGE_IS_PERSISTENT ? 'true' : 'false');
   try {
     ensureDataDir();
     if (!fs.existsSync(STATE_FILE)) {
@@ -47,6 +63,7 @@ app.post('/api/state', (req, res) => {
   if (!body || !Array.isArray(body.players) || !Array.isArray(body.matches)) {
     return res.status(400).json({ error: 'Invalid state: need players and matches arrays' });
   }
+  body._serverSavedAt = new Date().toISOString();
   try {
     ensureDataDir();
     fs.writeFileSync(STATE_FILE, JSON.stringify(body, null, 2), 'utf8');

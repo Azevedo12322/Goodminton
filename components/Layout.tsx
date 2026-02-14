@@ -12,6 +12,24 @@ interface LayoutProps {
   onTabChange: (tab: StudioTab) => void;
   loggedPlayer: Player | null;
   matches: Match[];
+  lastServerSavedAt?: string | null;
+  storagePersistent?: boolean;
+}
+
+function formatLastUpdated(iso: string): string {
+  try {
+    const d = new Date(iso);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffM = Math.floor(diffMs / 60000);
+    if (diffM < 1) return 'agora';
+    if (diffM < 60) return `há ${diffM} min`;
+    const diffH = Math.floor(diffM / 60);
+    if (diffH < 24) return `há ${diffH}h`;
+    return d.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
 }
 
 const Layout: React.FC<LayoutProps> = ({ 
@@ -22,7 +40,9 @@ const Layout: React.FC<LayoutProps> = ({
   activeTab, 
   onTabChange, 
   loggedPlayer, 
-  matches 
+  matches,
+  lastServerSavedAt,
+  storagePersistent,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -149,6 +169,11 @@ const Layout: React.FC<LayoutProps> = ({
               <span className="text-[9px] text-slate-500">•</span>
               <span className="text-[9px] font-black text-slate-200">{status.nextInfo}</span>
             </div>
+            {lastServerSavedAt && (
+              <span className="hidden md:inline text-[10px] text-slate-500 ml-1" title={lastServerSavedAt}>
+                Atualizado {formatLastUpdated(lastServerSavedAt)}
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-4">
@@ -163,7 +188,12 @@ const Layout: React.FC<LayoutProps> = ({
             )}
           </div>
         </header>
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-8 pb-[calc(2rem+env(safe-area-inset-bottom,0px))] overscroll-behavior-y-contain">
+        {storagePersistent === false && (
+          <div className="shrink-0 px-3 sm:px-4 md:px-8 py-2 bg-amber-500/15 border-b border-amber-500/30 text-amber-200/90 text-xs">
+            <strong>PC e telemóvel podem mostrar dados diferentes.</strong> No Railway: adicionar um volume (montar <code className="bg-slate-800/50 px-1 rounded">/data</code>) e variável <code className="bg-slate-800/50 px-1 rounded">DATA_PATH=/data</code>.
+          </div>
+        )}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-8 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))] overscroll-behavior-y-contain">
           {children}
         </div>
       </main>

@@ -76,25 +76,78 @@ const App: React.FC = () => {
     localStorage.setItem('goodminton_state_v5_g2pool', JSON.stringify(tournament));
   }, [tournament]);
 
-  const refreshState = useCallback(() => {
-    fetchState().then((serverState) => {
-      if (serverState) setTournament(serverState);
-    }).catch(() => {});
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [lastServerSavedAt, setLastServerSavedAt] = useState<string | null>(null);
+  const [storagePersistent, setStoragePersistent] = useState<boolean | undefined>(undefined);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'error' | null>(null);
+
+  const applyFetchResult = useCallback((result: import('./api').FetchStateResult) => {
+    if (result.ok) {
+      setTournament(result.state);
+      setLoadError(false);
+      if (result.serverSavedAt != null) setLastServerSavedAt(result.serverSavedAt);
+      if (result.storagePersistent !== undefined) setStoragePersistent(result.storagePersistent);
+    } else if (result.error === 'network') {
+      setLoadError(true);
+    }
   }, []);
+
+  const refreshState = useCallback(() => {
+    setLoadError(false);
+    fetchState().then((result) => {
+      if (result.ok) {
+        setTournament(result.state);
+        if (result.serverSavedAt != null) setLastServerSavedAt(result.serverSavedAt);
+        if (result.storagePersistent !== undefined) setStoragePersistent(result.storagePersistent);
+      }
+      applyFetchResult(result);
+      setInitialLoadDone(true);
+    }).catch(() => {
+      setLoadError(true);
+      setInitialLoadDone(true);
+    });
+  }, [applyFetchResult]);
 
   useEffect(() => {
     let cancelled = false;
-    const applyState = (serverState: TournamentState | null) => {
-      if (cancelled || !serverState) return;
-      setTournament(serverState);
-    };
-    fetchState().then(applyState).catch(() => {});
+    fetchState().then((result) => {
+      if (cancelled) return;
+      setInitialLoadDone(true);
+      if (result.ok) {
+        setTournament(result.state);
+        if (result.serverSavedAt != null) setLastServerSavedAt(result.serverSavedAt);
+        if (result.storagePersistent !== undefined) setStoragePersistent(result.storagePersistent);
+      }
+      if (result.error === 'network') setLoadError(true);
+    }).catch(() => {
+      if (!cancelled) {
+        setInitialLoadDone(true);
+        setLoadError(true);
+      }
+    });
 
     const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') fetchState().then(applyState).catch(() => {});
+      if (document.visibilityState === 'visible') {
+        fetchState().then((result) => {
+          if (!cancelled && result.ok) {
+            setTournament(result.state);
+            if (result.serverSavedAt != null) setLastServerSavedAt(result.serverSavedAt);
+            if (result.storagePersistent !== undefined) setStoragePersistent(result.storagePersistent);
+          }
+        });
+      }
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
-    const interval = setInterval(() => fetchState().then(applyState).catch(() => {}), 30000);
+    const interval = setInterval(() => {
+      fetchState().then((result) => {
+        if (!cancelled && result.ok) {
+          setTournament(result.state);
+          if (result.serverSavedAt != null) setLastServerSavedAt(result.serverSavedAt);
+          if (result.storagePersistent !== undefined) setStoragePersistent(result.storagePersistent);
+        }
+      });
+    }, 30000);
 
     return () => {
       cancelled = true;
@@ -366,7 +419,15 @@ const App: React.FC = () => {
 
       const next = { ...prev, matches: newMatches };
       if (isAdmin && adminPasswordRef.current) {
-        saveState(next, adminPasswordRef.current).catch(() => {});
+        saveState(next, adminPasswordRef.current)
+          .then((ok) => {
+            setSaveStatus(ok ? 'saved' : 'error');
+            setTimeout(() => setSaveStatus(null), 4000);
+          })
+          .catch(() => {
+            setSaveStatus('error');
+            setTimeout(() => setSaveStatus(null), 4000);
+          });
       }
       return next;
     });
@@ -383,7 +444,8 @@ const App: React.FC = () => {
           state={tournament} 
           onUpdateMatch={updateMatch} 
           isLoggedIn={isAdmin} 
-          onLogin={handleAdminLogin} 
+          onLogin={handleAdminLogin}
+          saveStatus={saveStatus}
         />
       );
       default: return <Home />;
@@ -392,7 +454,7 @@ const App: React.FC = () => {
 
   if (!loggedPlayer) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-slate-950 p-4 pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
+      <div className="flex min-h-screen w-full items-center justify-center bg-slate-950 p-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
         <form onSubmit={handleLogin} className="glass-effect p-10 rounded-[2.5rem] border border-slate-800 space-y-8 w-full max-w-md animate-fadeIn">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-black bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent italic tracking-tighter">
@@ -429,6 +491,8 @@ const App: React.FC = () => {
       onTabChange={setActiveTab} 
       loggedPlayer={loggedPlayer} 
       matches={tournament.matches}
+      lastServerSavedAt={lastServerSavedAt}
+      storagePersistent={storagePersistent}
       sidebar={
         <Sidebar 
           activeTab={activeTab} 
@@ -439,7 +503,22 @@ const App: React.FC = () => {
         />
       }
     >
-      {renderContent()}
+      <>
+        {loadError && (
+          <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-center gap-3 bg-amber-500/20 text-amber-200 border-b border-amber-500/40 px-4 py-2 text-sm">
+            <span>Não foi possível carregar os resultados.</span>
+            <button type="button" onClick={refreshState} className="underline font-medium min-h-[44px] min-w-[44px] touch-manipulation">
+              Atualizar
+            </button>
+          </div>
+        )}
+        {!initialLoadDone && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/90">
+            <p className="text-slate-400 animate-pulse">A carregar resultados…</p>
+          </div>
+        )}
+        {renderContent()}
+      </>
     </Layout>
   );
 };
