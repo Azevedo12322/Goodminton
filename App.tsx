@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import Layout from './components/Layout';
 import Home from './components/Studio/Home';
@@ -8,6 +8,7 @@ import ScheduleView from './components/Studio/ScheduleView';
 import AdminPanel from './components/Studio/AdminPanel';
 import RankingView from './components/Studio/RankingView';
 import { StudioTab, TournamentState, Match, Player, GroupId } from './types';
+import { fetchState, saveState } from './api';
 
 const INITIAL_PLAYER_NAMES = [
   "Diogo Shan", "Renato Albino", "Igor Tobultoc", "Pedro Rodrigues", 
@@ -22,9 +23,35 @@ const INITIAL_PLAYERS: Player[] = INITIAL_PLAYER_NAMES.map((name, i) => ({
   name: name
 }));
 
+function getDefaultTournamentState(): TournamentState {
+  const matches: Match[] = [];
+  for (let i = 0; i < 10; i++) {
+    matches.push({ id: `G1-R0-M${i+1}`, groupId: 'G1', round: 0, label: 'G1-R1: Fase Inicial', player1Id: INITIAL_PLAYERS[i*2].id, player2Id: INITIAL_PLAYERS[i*2+1].id, status: 'pending' });
+  }
+  for (let i = 0; i < 5; i++) matches.push({ id: `G1-R1-M${i+1}`, groupId: 'G1', round: 1, label: 'G1-R2: Pré-Classificados', player1Id: null, player2Id: null, status: 'pending' });
+  for (let i = 0; i < 3; i++) matches.push({ id: `G1-R2-M${i+1}`, groupId: 'G1', round: 2, label: 'G1-R3: Classificados', player1Id: null, player2Id: i === 2 ? INITIAL_PLAYERS[20].id : null, status: 'pending' });
+  matches.push({ id: `GC-R0-M1`, groupId: 'GC', round: 0, label: 'Pool Final: Jogo 1', player1Id: null, player2Id: null, status: 'pending' });
+  matches.push({ id: `GC-R0-M2`, groupId: 'GC', round: 0, label: 'Pool Final: Jogo 2', player1Id: null, player2Id: null, status: 'pending' });
+  matches.push({ id: `GC-R0-M3`, groupId: 'GC', round: 0, label: 'Pool Final: Jogo 3', player1Id: null, player2Id: null, status: 'pending' });
+  matches.push({ id: `G2-R0-M1`, groupId: 'G2', round: 0, label: 'Pool G2: Jogo 1', player1Id: null, player2Id: null, status: 'pending' });
+  matches.push({ id: `G2-R0-M2`, groupId: 'G2', round: 0, label: 'Pool G2: Jogo 2', player1Id: null, player2Id: null, status: 'pending' });
+  matches.push({ id: `G2-R0-M3`, groupId: 'G2', round: 0, label: 'Pool G2: Jogo 3', player1Id: null, player2Id: null, status: 'pending' });
+  matches.push({ id: `G3-R0-M1`, groupId: 'G3', round: 0, label: 'Playoff G3: Jogo A', player1Id: null, player2Id: null, status: 'pending' });
+  matches.push({ id: `G3-R0-M2`, groupId: 'G3', round: 0, label: 'Playoff G3: Jogo B', player1Id: null, player2Id: null, status: 'pending' });
+  for (let i = 1; i <= 3; i++) matches.push({ id: `G3-R1-M${i}`, groupId: 'G3', round: 1, label: `Pool G3: Jogo ${i}`, player1Id: null, player2Id: null, status: 'pending' });
+  for (let i = 1; i <= 5; i++) matches.push({ id: `G4-R0-M${i}`, groupId: 'G4', round: 0, label: `Playoff G4: Jogo ${i}`, player1Id: null, player2Id: null, status: 'pending' });
+  for (let i = 1; i <= 3; i++) matches.push({ id: `G4-R1-M${i}`, groupId: 'G4', round: 1, label: `G4-R2: Jogo ${i}`, player1Id: null, player2Id: null, status: 'pending' });
+  for (let i = 1; i <= 3; i++) matches.push({ id: `G4-R2-M${i}`, groupId: 'G4', round: 2, label: `Pool G4: Jogo ${i}`, player1Id: null, player2Id: null, status: 'pending' });
+  matches.push({ id: `G5-R0-M1`, groupId: 'G5', round: 0, label: 'Playoff G5: Jogo 1', player1Id: null, player2Id: null, status: 'pending' });
+  matches.push({ id: `G5-R0-M2`, groupId: 'G5', round: 0, label: 'Playoff G5: Jogo 2', player1Id: null, player2Id: null, status: 'pending' });
+  for (let i = 1; i <= 3; i++) matches.push({ id: `G5-R1-M${i}`, groupId: 'G5', round: 1, label: `Pool G5: Jogo ${i}`, player1Id: null, player2Id: null, status: 'pending' });
+  return { players: INITIAL_PLAYERS, matches, rankings: Object.fromEntries(Array.from({ length: 21 }, (_, i) => [i + 1, null])) };
+}
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<StudioTab>(StudioTab.HOME);
   const [isAdmin, setIsAdmin] = useState(false);
+  const adminPasswordRef = useRef<string | null>(null);
   const [loggedPlayer, setLoggedPlayer] = useState<Player | null>(() => {
     try {
       const saved = localStorage.getItem('goodminton_state_v5_g2pool_user');
@@ -40,78 +67,25 @@ const App: React.FC = () => {
       const saved = localStorage.getItem('goodminton_state_v5_g2pool');
       if (saved) return JSON.parse(saved);
     } catch {
-      // Tampered or corrupted localStorage; use default state
+      // Tampered or corrupted localStorage
     }
-
-    const matches: Match[] = [];
-    
-    // --- G1: MAIN GAMES (Ronda 1, 2, 3) ---
-    for(let i = 0; i < 10; i++) {
-      matches.push({
-        id: `G1-R0-M${i+1}`, groupId: 'G1', round: 0, label: 'G1-R1: Fase Inicial',
-        player1Id: INITIAL_PLAYERS[i*2].id, player2Id: INITIAL_PLAYERS[i*2+1].id, status: 'pending'
-      });
-    }
-    for(let i = 0; i < 5; i++) {
-      matches.push({ id: `G1-R1-M${i+1}`, groupId: 'G1', round: 1, label: 'G1-R2: Pré-Classificados', player1Id: null, player2Id: null, status: 'pending' });
-    }
-    for(let i = 0; i < 3; i++) {
-      matches.push({ 
-        id: `G1-R2-M${i+1}`, 
-        groupId: 'G1', 
-        round: 2, 
-        label: 'G1-R3: Classificados', 
-        player1Id: null, 
-        player2Id: i === 2 ? INITIAL_PLAYERS[20].id : null, 
-        status: 'pending' 
-      });
-    }
-
-    // --- GC: FASE FINAL ---
-    matches.push({ id: `GC-R0-M1`, groupId: 'GC', round: 0, label: 'Pool Final: Jogo 1', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `GC-R0-M2`, groupId: 'GC', round: 0, label: 'Pool Final: Jogo 2', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `GC-R0-M3`, groupId: 'GC', round: 0, label: 'Pool Final: Jogo 3', player1Id: null, player2Id: null, status: 'pending' });
-
-    // --- G2: SEMI-LOSERS (R3) ---
-    matches.push({ id: `G2-R0-M1`, groupId: 'G2', round: 0, label: 'Pool G2: Jogo 1', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G2-R0-M2`, groupId: 'G2', round: 0, label: 'Pool G2: Jogo 2', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G2-R0-M3`, groupId: 'G2', round: 0, label: 'Pool G2: Jogo 3', player1Id: null, player2Id: null, status: 'pending' });
-
-    // --- G3: LOSERS R2 (PLAYOFF + POOL) ---
-    matches.push({ id: `G3-R0-M1`, groupId: 'G3', round: 0, label: 'Playoff G3: Jogo A', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G3-R0-M2`, groupId: 'G3', round: 0, label: 'Playoff G3: Jogo B', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G3-R1-M1`, groupId: 'G3', round: 1, label: 'Pool G3: Jogo 1', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G3-R1-M2`, groupId: 'G3', round: 1, label: 'Pool G3: Jogo 2', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G3-R1-M3`, groupId: 'G3', round: 1, label: 'Pool G3: Jogo 3', player1Id: null, player2Id: null, status: 'pending' });
-
-    // --- G4: LOSERS R1 ---
-    for(let i = 0; i < 5; i++) {
-        matches.push({ id: `G4-R0-M${i+1}`, groupId: 'G4', round: 0, label: 'Playoff G4: Jogo ' + (i+1), player1Id: null, player2Id: null, status: 'pending' });
-    }
-    for(let i = 0; i < 3; i++) {
-        matches.push({ id: `G4-R1-M${i+1}`, groupId: 'G4', round: 1, label: 'G4-R2: Jogo ' + (i+1), player1Id: null, player2Id: null, status: 'pending' });
-    }
-    for(let i = 0; i < 3; i++) {
-        matches.push({ id: `G4-R2-M${i+1}`, groupId: 'G4', round: 2, label: 'Pool G4: Jogo ' + (i+1), player1Id: null, player2Id: null, status: 'pending' });
-    }
-
-    // --- G5: PERDEDORES G4 ---
-    matches.push({ id: `G5-R0-M1`, groupId: 'G5', round: 0, label: 'Playoff G5: Jogo 1', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G5-R0-M2`, groupId: 'G5', round: 0, label: 'Playoff G5: Jogo 2', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G5-R1-M1`, groupId: 'G5', round: 1, label: 'Pool G5: Jogo 1', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G5-R1-M2`, groupId: 'G5', round: 1, label: 'Pool G5: Jogo 2', player1Id: null, player2Id: null, status: 'pending' });
-    matches.push({ id: `G5-R1-M3`, groupId: 'G5', round: 1, label: 'Pool G5: Jogo 3', player1Id: null, player2Id: null, status: 'pending' });
-
-    return {
-      players: INITIAL_PLAYERS,
-      matches: matches,
-      rankings: Object.fromEntries(Array.from({length: 21}, (_, i) => [i + 1, null]))
-    };
+    return getDefaultTournamentState();
   });
 
   useEffect(() => {
     localStorage.setItem('goodminton_state_v5_g2pool', JSON.stringify(tournament));
   }, [tournament]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchState()
+      .then((serverState) => {
+        if (cancelled || !serverState) return;
+        setTournament(serverState);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (loggedPlayer) {
@@ -134,6 +108,19 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setLoggedPlayer(null);
     setIsAdmin(false);
+    adminPasswordRef.current = null;
+  };
+
+  const handleAdminLogin = (success: boolean, password?: string) => {
+    setIsAdmin(success);
+    adminPasswordRef.current = success && password ? password : null;
+  };
+
+  const handleResetTournament = () => {
+    if (!adminPasswordRef.current) return;
+    const defaultState = getDefaultTournamentState();
+    setTournament(defaultState);
+    saveState(defaultState, adminPasswordRef.current).catch(() => {});
   };
 
   const updateMatch = (updatedMatch: Match) => {
@@ -361,7 +348,11 @@ const App: React.FC = () => {
         }
       }
 
-      return { ...prev, matches: newMatches };
+      const next = { ...prev, matches: newMatches };
+      if (isAdmin && adminPasswordRef.current) {
+        saveState(next, adminPasswordRef.current).catch(() => {});
+      }
+      return next;
     });
   };
 
@@ -376,7 +367,7 @@ const App: React.FC = () => {
           state={tournament} 
           onUpdateMatch={updateMatch} 
           isLoggedIn={isAdmin} 
-          onLogin={setIsAdmin} 
+          onLogin={handleAdminLogin} 
         />
       );
       default: return <Home />;

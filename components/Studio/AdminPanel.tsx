@@ -5,7 +5,7 @@ import { TournamentState, Match } from '../../types';
 interface AdminPanelProps {
   state: TournamentState;
   onUpdateMatch: (match: Match) => void;
-  onLogin: (success: boolean) => void;
+  onLogin: (success: boolean, password?: string) => void;
   isLoggedIn: boolean;
 }
 
@@ -18,9 +18,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, 
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const expectedPassword = typeof import.meta.env.VITE_ADMIN_PASSWORD === 'string' ? import.meta.env.VITE_ADMIN_PASSWORD : '';
-    if (expectedPassword && password === expectedPassword) {
-      onLogin(true);
+    const raw = typeof import.meta.env.VITE_ADMIN_PASSWORD === 'string' ? import.meta.env.VITE_ADMIN_PASSWORD : '';
+    const expectedPassword = raw.trim();
+    const entered = password.trim();
+    if (expectedPassword && entered === expectedPassword) {
+      onLogin(true, entered);
     } else {
       alert('Password incorreta!');
     }
@@ -108,11 +110,18 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, 
                     <span className={m.winnerId === m.player2Id ? 'text-emerald-400' : 'text-white'}>{p2Name}</span>
                   </h4>
                   {isCompleted && (
-                    <div className="flex items-center gap-3 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
                       <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">
                         Resultado: <span className="text-white font-mono">{m.score1} - {m.score2}</span>
                       </p>
-                      <div className="h-1 w-1 rounded-full bg-slate-700" />
+                      <button
+                        type="button"
+                        onClick={() => startEdit(m)}
+                        className="text-[9px] font-black uppercase tracking-widest text-amber-400 hover:text-amber-300 border border-amber-500/40 hover:border-amber-400/60 rounded-lg px-2 py-1 transition-colors touch-manipulation"
+                      >
+                        Corrigir resultado
+                      </button>
+                      <div className="h-1 w-1 rounded-full bg-slate-700 hidden sm:block" />
                       <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">
                         Vencedor: <span className="text-emerald-400">{state.players.find(p => p.id === m.winnerId)?.name}</span>
                       </p>
