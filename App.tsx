@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import Layout from './components/Layout';
 import Home from './components/Studio/Home';
@@ -76,6 +76,12 @@ const App: React.FC = () => {
     localStorage.setItem('goodminton_state_v5_g2pool', JSON.stringify(tournament));
   }, [tournament]);
 
+  const refreshState = useCallback(() => {
+    fetchState().then((serverState) => {
+      if (serverState) setTournament(serverState);
+    }).catch(() => {});
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     const applyState = (serverState: TournamentState | null) => {
@@ -88,7 +94,7 @@ const App: React.FC = () => {
       if (document.visibilityState === 'visible') fetchState().then(applyState).catch(() => {});
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
-    const interval = setInterval(() => fetchState().then(applyState).catch(() => {}), 45000);
+    const interval = setInterval(() => fetchState().then(applyState).catch(() => {}), 30000);
 
     return () => {
       cancelled = true;
@@ -417,7 +423,8 @@ const App: React.FC = () => {
 
   return (
     <Layout 
-      onLogout={handleLogout} 
+      onLogout={handleLogout}
+      onRefresh={refreshState}
       activeTab={activeTab} 
       onTabChange={setActiveTab} 
       loggedPlayer={loggedPlayer} 

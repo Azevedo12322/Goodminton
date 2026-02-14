@@ -7,6 +7,7 @@ interface LayoutProps {
   children: React.ReactNode;
   sidebar: React.ReactNode;
   onLogout?: () => void;
+  onRefresh?: () => void;
   activeTab: StudioTab;
   onTabChange: (tab: StudioTab) => void;
   loggedPlayer: Player | null;
@@ -17,6 +18,7 @@ const Layout: React.FC<LayoutProps> = ({
   children, 
   sidebar, 
   onLogout, 
+  onRefresh,
   activeTab, 
   onTabChange, 
   loggedPlayer, 
@@ -121,7 +123,18 @@ const Layout: React.FC<LayoutProps> = ({
           </div>
 
           {/* Central Status Info (Mobile & Desktop) */}
-          <div className="flex-1 flex justify-center px-2">
+          <div className="flex-1 flex justify-center items-center gap-2 px-2">
+            {onRefresh && (
+              <button
+                type="button"
+                onClick={onRefresh}
+                className="shrink-0 p-2 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-slate-800/50 transition-colors touch-manipulation"
+                title="Atualizar resultados"
+                aria-label="Atualizar resultados"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              </button>
+            )}
             <div className="hidden sm:flex items-center gap-4 px-4 py-1.5 bg-slate-900/50 border border-slate-800 rounded-full">
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{firstName}</span>
               <div className="h-3 w-[1px] bg-slate-800" />
