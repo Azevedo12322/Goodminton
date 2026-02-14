@@ -78,13 +78,23 @@ const App: React.FC = () => {
 
   useEffect(() => {
     let cancelled = false;
-    fetchState()
-      .then((serverState) => {
-        if (cancelled || !serverState) return;
-        setTournament(serverState);
-      })
-      .catch(() => {});
-    return () => { cancelled = true; };
+    const applyState = (serverState: TournamentState | null) => {
+      if (cancelled || !serverState) return;
+      setTournament(serverState);
+    };
+    fetchState().then(applyState).catch(() => {});
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') fetchState().then(applyState).catch(() => {});
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    const interval = setInterval(() => fetchState().then(applyState).catch(() => {}), 45000);
+
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => {
