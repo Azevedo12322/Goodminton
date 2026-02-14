@@ -13,20 +13,34 @@ interface AdminPanelProps {
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, isLoggedIn, saveStatus }) => {
   const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [verifying, setVerifying] = useState(false);
   const [editingMatch, setEditingMatch] = useState<string | null>(null);
   const [matchData, setMatchData] = useState<Partial<Match>>({});
   const [score1, setScore1] = useState<number>(0);
   const [score2, setScore2] = useState<number>(0);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     const entered = password.trim();
+    setLoginError('');
     if (!entered) {
-      alert('Indica a palavra-passe.');
+      setLoginError('Indica a palavra-passe.');
       return;
     }
-    // Password is validated by the server when saving; no client-side check so deploy works with only ADMIN_PASSWORD.
-    onLogin(true, entered);
+    setVerifying(true);
+    try {
+      const ok = await verifyAdminPassword(entered);
+      if (ok) {
+        onLogin(true, entered);
+      } else {
+        setLoginError('Palavra-passe incorreta. Apenas os organizadores podem entrar.');
+      }
+    } catch {
+      setLoginError('Erro de ligação. Tenta novamente.');
+    } finally {
+      setVerifying(false);
+    }
   };
 
   const startEdit = (match: Match) => {
