@@ -11,7 +11,7 @@ function isValidState(data: unknown): data is TournamentState {
 
 export async function fetchState(): Promise<TournamentState | null> {
   try {
-    const res = await fetch('/api/state');
+    const res = await fetch(`/api/state?t=${Date.now()}`, { cache: 'no-store' });
     if (res.status === 404) return null;
     if (!res.ok) return null;
     const data = await res.json();
