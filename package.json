@@ -11,9 +11,10 @@
     "dev:server": "PORT=3001 node server/index.js"
   },
   "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^4.21.0",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "express": "^4.21.0"
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -193,7 +193,7 @@ const Layout: React.FC<LayoutProps> = ({
             <strong>PC e telemóvel podem mostrar dados diferentes.</strong> No Railway: adicionar um volume (montar <code className="bg-slate-800/50 px-1 rounded">/data</code>) e variável <code className="bg-slate-800/50 px-1 rounded">DATA_PATH=/data</code>.
           </div>
         )}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-8 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))] overscroll-behavior-y-contain">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 md:p-8 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))] overscroll-behavior-y-contain">
           {children}
         </div>
       </main>

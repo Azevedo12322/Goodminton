@@ -42,7 +42,9 @@ export async function fetchState(): Promise<FetchStateResult> {
 }
 
 
-export async function verifyAdminPassword(password: string): Promise<boolean> {
+export type VerifyAdminResult = 'ok' | 'wrong_password' | 'not_configured' | 'network_error';
+
+export async function verifyAdminPassword(password: string): Promise<VerifyAdminResult> {
   const base = getApiBase();
   try {
     const res = await fetch(`${base}/api/admin/verify`, {
@@ -50,9 +52,12 @@ export async function verifyAdminPassword(password: string): Promise<boolean> {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ password: password.trim() }),
     });
-    return res.ok;
+    if (res.ok) return 'ok';
+    if (res.status === 503) return 'not_configured';
+    if (res.status === 401) return 'wrong_password';
+    return 'network_error';
   } catch {
-    return false;
+    return 'network_error';
   }
 }
 

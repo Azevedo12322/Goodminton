@@ -30,11 +30,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, 
     }
     setVerifying(true);
     try {
-      const ok = await verifyAdminPassword(entered);
-      if (ok) {
+      const result = await verifyAdminPassword(entered);
+      if (result === 'ok') {
         onLogin(true, entered);
-      } else {
+      } else if (result === 'not_configured') {
+        setLoginError('Servidor sem palavra-passe admin. Em produção, define ADMIN_PASSWORD no Railway.');
+      } else if (result === 'wrong_password') {
         setLoginError('Palavra-passe incorreta. Apenas os organizadores podem entrar.');
+      } else {
+        setLoginError('Erro de ligação. Tenta novamente.');
       }
     } catch {
       setLoginError('Erro de ligação. Tenta novamente.');
@@ -73,7 +77,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ state, onUpdateMatch, onLogin, 
 
   if (!isLoggedIn) {
     return (
-      <div className="max-w-md mx-auto py-8 sm:py-20 px-3 animate-fadeIn">
+      <div className="min-h-[60vh] flex flex-col justify-center max-w-md mx-auto py-8 sm:py-20 px-3 animate-fadeIn">
         <form onSubmit={handleLogin} className="glass-effect p-6 sm:p-10 rounded-2xl sm:rounded-[2.5rem] border border-slate-800 space-y-6">
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold">Admin Login</h2>

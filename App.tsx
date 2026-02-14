@@ -454,7 +454,7 @@ const App: React.FC = () => {
 
   if (!loggedPlayer) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-slate-950 p-4 pb-[calc(4rem+env(safe-area-inset-bottom,0px))] md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
+      <div className="flex min-h-screen w-full items-center justify-center bg-slate-950 p-4 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-[calc(2rem+env(safe-area-inset-bottom,0px))]">
         <form onSubmit={handleLogin} className="glass-effect p-10 rounded-[2.5rem] border border-slate-800 space-y-8 w-full max-w-md animate-fadeIn">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-black bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent italic tracking-tighter">
@@ -512,7 +512,7 @@ const App: React.FC = () => {
             </button>
           </div>
         )}
-        {!initialLoadDone && (
+        {!initialLoadDone && activeTab !== StudioTab.ADMIN && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/90">
             <p className="text-slate-400 animate-pulse">A carregar resultados…</p>
           </div>
